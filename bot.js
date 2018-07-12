@@ -551,7 +551,8 @@ bot.action(/cancel_(\d)_(.+?)$/, async ctx => {
 bot.help(ctx => ctx.reply(`Элизабет - обменник для @ChatHeroBot.
 Позволяет быстро и просто обменять монеты, предметы и экипировку.
 
-Написано @Loskir`));
+Написано @Loskir
+Сурсы <a href="https://github.com/Loskir/ChatHeroTrade">тут</a>`, {parse_mode: 'HTML'}));
 bot.catch(console.log);
 
 bot.startPolling();
