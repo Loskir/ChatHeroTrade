@@ -1,10 +1,15 @@
 {
   "name": "ChatHeroTrade",
   "version": "0.0.1",
+  "description": "A trade bot for Chat Hero Telegram game",
+  "main": "bot.js",
+  "author": "Loskir",
   "homepage": "https://github.com/Loskir/ChatHeroTrade",
+  "license": "MIT",
   "dependencies": {
     "telegraf": "^3.21.2",
     "promise-mongo": "^3.0.3",
+    "request": "^2.87.0",
     "request-promise": "^4.2.2",
     "mz": "^2.7.0"
   }
