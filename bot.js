@@ -137,16 +137,16 @@ let getPlayerTradeText = t => {
 let getTradeText = t1 => `Ты предлагаешь:
 ${getPlayerTradeText(t1)}`;
 let getPlayerConfirmText = (p, t) => {
-    let text = getPlayerTradeText(t);
+    let text = getPlayerTradeItemsText(t);
     return `${getName(p)} предлагает:
-${text.text}${text.empty ? '' : `\nОбщая стоимость: ${getPlayerTradePrice(t)}`}`
+${text.text}${text.empty ? '' : `\nОбщая стоимость: ${getItemName('money')}${getPlayerTradePrice(t)}`}`
 };
 let getConfirmText = (p1, t1, p2, t2) => {
     return `${getPlayerConfirmText(p1, t1)}
 
 ${getPlayerConfirmText(p2, t2)}
 
-Все верно?`
+Всё верно?`
 };
 let getConfirmKeyboard = (trade_id, i) => [[ib('✅Да', `confirm_${i}_${trade_id}`), ib('❌Нет', `cancel_${i}_${trade_id}`)]];
 
