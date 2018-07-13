@@ -166,11 +166,13 @@ bot.start(async ctx => {
             return
         }
 
+        players = players.filter(v => v.id !== ctx.from.id);
         db.players.deleteMany({id: ctx.from.id})
-            .then(r => {
-                console.log(r);
-                return db.players.insertOne({id: ctx.from.id, token: token, player: player, expirationTimestamp: Date.now() + player.ttl*1000})
-            })
+            .then(r => db.players.insertOne({
+                id: ctx.from.id,
+                token,
+                player,
+                expirationTimestamp: Date.now() + player.ttl*1000}))
             .then(r => timeouts.push({
                 id: ctx.from.id,
                 timeout: setTimeout(() => {
