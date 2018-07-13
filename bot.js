@@ -521,8 +521,8 @@ bot.action(/^confirm_(\d)_(.+?)$/, async ctx => {
                 ctx.telegram.sendMessage(he.id, str.confirmTrade);
             })
             .catch(v => {
-                ctx.reply(str.smthWentWrong);
-                ctx.telegram.sendMessage(he.id, str.smthWentWrong);
+                ctx.reply(str.smthWentWrong+'\n'+v.message);
+                ctx.telegram.sendMessage(he.id, str.smthWentWrong+'\n'+v.message);
                 console.log(v)
             })
     }
