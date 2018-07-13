@@ -125,16 +125,29 @@ let getPlayerTradeItemsText = t => {
         empty: arr.length === 0
     }
 };
-let getPlayerTradePrice = t => getItemPrice('money')*t.money
+let getPlayerTradePrice = t => {
+    return getItemPrice('money')*t.money
     + Object.keys(t.items).map(v => getItemPrice('items.'+v)*t.items[v]).reduce((a, v) => a+v, 0)
-    + Object.keys(t.equip).map(v => getItemPrice('equip.'+v)*t.equip[v]).reduce((a, v) => a+v, 0);
+    + Object.keys(t.equip).map(v => getItemPrice('equip.'+v)*t.equip[v]).reduce((a, v) => a+v, 0)
+};
 let getPlayerTradeText = t => {
     let tradeText = getPlayerTradeItemsText(t);
     return tradeText.text + (tradeText.empty ? '' : `\n\nОбщая стоимость: ${getItemName('money')}${getPlayerTradePrice(t)}`);
 };
-
-let getTradeText = (t1, p2, t2) => `Ты предлагаешь:
+let getTradeText = t1 => `Ты предлагаешь:
 ${getPlayerTradeText(t1)}`;
+let getPlayerConfirmText = (p, t) => {
+    let text = getPlayerTradeText(t);
+    return `${getName(p)} предлагает:
+${text.text}${text.empty ? '' : `\nОбщая стоимость: ${getPlayerTradePrice(t)}`}`
+};
+let getConfirmText = (p1, t1, p2, t2) => {
+    return `${getPlayerConfirmText(p1, t1)}
+
+${getPlayerConfirmText(p2, t2)}
+
+Все верно?`
+};
 let getConfirmKeyboard = (trade_id, i) => [[ib('✅Да', `confirm_${i}_${trade_id}`), ib('❌Нет', `cancel_${i}_${trade_id}`)]];
 
 let timeouts = [];
@@ -241,11 +254,11 @@ bot.action(/^start_(accept|decline)_(.+)$/, async ctx => {
         let t1 = {money: 0, items: {}, equip: {}};
         let t2 = {money: 0, items: {}, equip: {}};
         let trade = await db.trades.insertOne({p1: p1._id, p2: p2._id, t1, t2, selected: {}, tab: {'1': 1, '2': 1}});
-        ctx.reply(getTradeText(t1, p2, t2), {
+        ctx.reply(getTradeText(t1), {
             parse_mode: 'HTML',
             reply_markup: {inline_keyboard: getTradeKeyboard(trade.insertedId, 1, p1.player, undefined, 1)}
         });
-        ctx.telegram.sendMessage(p2.id, getTradeText(t2, p1, t1), {
+        ctx.telegram.sendMessage(p2.id, getTradeText(t2), {
             parse_mode: 'HTML',
             reply_markup: {inline_keyboard: getTradeKeyboard(trade.insertedId, 2, p2.player, undefined, 1)}
         });
@@ -391,13 +404,7 @@ ${getPlayerTradeText(trade[`t${index}`])}`, {parse_mode: 'HTML'});
         db.trades.updateOne({_id: pm.mongo.ObjectId(trade_id)}, {$set: {ready: true}});
     }
     else {
-        let text = `${getName(p1.player)} предлагает:
-${getPlayerTradeText(trade.t1)}
-
-${getName(p2.player)} предлагает:
-${getPlayerTradeText(trade.t2)}
-
-Все верно?`;
+        let text = getConfirmText(p1.player, trade.t1, p2.player, trade.t2);
         ctx.reply(text, {
             parse_mode: 'HTML',
             reply_markup: {
