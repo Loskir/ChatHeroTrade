@@ -1,0 +1,11 @@
+{
+  "name": "ChatHeroTrade",
+  "version": "0.0.1",
+  "homepage": "https://github.com/Loskir/ChatHeroTrade",
+  "dependencies": {
+    "telegraf": "^3.21.2",
+    "promise-mongo": "^3.0.3",
+    "request-promise": "^4.2.2",
+    "mz": "^2.7.0"
+  }
+}
