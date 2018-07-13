@@ -208,7 +208,7 @@ bot.action(/^id_(.+)$/, async ctx => {
     let p1 = players.find(v => v.id === ctx.from.id);
     if (!p1) {
         ctx.answerCbQuery(str.tokenExpired);
-        ctx.editMessageReplyMarkup({});
+        ctx.editMessageReplyMarkup();
         return;
     }
     let p2 = await db.players.findOne({_id: pm.mongo.ObjectId(ctx.match[1])});
@@ -233,7 +233,7 @@ bot.action(/^start_(accept|decline)_(.+)$/, async ctx => {
     let p1 = players.find(v => v.id === ctx.from.id);
     if (!p1) {
         ctx.answerCbQuery(str.tokenExpired);
-        ctx.editMessageReplyMarkup({});
+        ctx.editMessageReplyMarkup();
         return;
     }
     let p2 = players.find(v => v._id.toString() === ctx.match[2]);
@@ -242,7 +242,7 @@ bot.action(/^start_(accept|decline)_(.+)$/, async ctx => {
         ctx.editMessageReplyMarkup({inline_keyboard: getPlayersKeyboard(players.filter(v => v.id !== ctx.from.id))});
         return
     }
-    ctx.editMessageReplyMarkup({});
+    ctx.editMessageReplyMarkup();
     if (ctx.match[1] === 'decline') {
         ctx.answerCbQuery('Ты прогнал незваного торговца');
         ctx.editMessageText('Ты прогнал незваного торговца');
@@ -279,7 +279,7 @@ bot.action(/^select_(\d)_(.+?)_(.+)$/, async ctx => {
     let p = players.find(v => v._id.toString() === player_id.toString());
     if (!p) {
         ctx.answerCbQuery(str.tokenExpired);
-        ctx.editMessageReplyMarkup({});
+        ctx.editMessageReplyMarkup();
         return;
     }
     ctx.editMessageText(getTradeText(trade[`t${index}`]), {
@@ -318,7 +318,7 @@ bot.action(/^edit_(\d)_(.+?)_([\d\.-]+)$/, async ctx => {
     let p = players.find(v => v._id.toString() === player_id.toString());
     if (!p) {
         ctx.answerCbQuery(str.tokenExpired);
-        ctx.editMessageReplyMarkup({});
+        ctx.editMessageReplyMarkup();
         return;
     }
 
@@ -358,7 +358,7 @@ bot.action(/tab_(\d)_(.+)_(\d+)/, async ctx => {
     let p = players.find(v => v._id.toString() === player_id.toString());
     if (!p) {
         ctx.answerCbQuery(str.tokenExpired);
-        ctx.editMessageReplyMarkup({});
+        ctx.editMessageReplyMarkup();
         return;
     }
     ctx.editMessageText(getTradeText(trade[`t${index}`]), {
