@@ -1,6 +1,6 @@
 const tokens = require('./tokens.js');
-// const host = 'https://api.chatherobot.ru';
-const host = 'https://chathero.ru';
+const host = 'https://api.chatherobot.ru';
+// const host = 'https://chathero.ru';
 
 const Telegraf = require('telegraf');
 const rp = require('request-promise');
