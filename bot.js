@@ -388,7 +388,7 @@ bot
         let total = Math.min(Math.max(0, curr+count), max);
         let delta = total - curr;
         
-        await db.trades.updateOne({_id: pm.mongo.ObjectId(trade_id)}, {$set: {[`t${index}.${item_id}`]: total}});
+        await db.trades.updateOne({_id: pm.mongo.ObjectId(trade_id)}, {$set: {[`t.${index}.${item_id}`]: total}});
         trade = await db.trades.findOne({_id: pm.mongo.ObjectId(trade_id)});
         t = trade.t[index];
         ctx.editMessageText(getTradeText(t), {
