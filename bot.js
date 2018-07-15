@@ -177,7 +177,9 @@ bot
     })
     .settings(async ctx => {
         ctx.reply('Здесь ты можешь изменить настройки', {
-            inline_keyboard: getSettingsKeyboard(ctx.state.user.settings)
+            reply_markup: {
+                inline_keyboard: getSettingsKeyboard(ctx.state.user.settings)
+            }
         })
     })
     .action(/^set_(.+)_(.+)$/, async ctx => {
