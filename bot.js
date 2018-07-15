@@ -170,15 +170,15 @@ bot
             };
             let r = await db.users.insertOne(u);
             u._id = r.insertedId;
-            bot.context.user = u;
+            ctx.state.user = u;
         }
-        else bot.context.user = user;
+        else ctx.state.user = user;
         next()
     })
     .settings(async ctx => {
         
         ctx.reply('Здесь ты можешь изменить настройки', {
-            inline_keyboard: getSettingsKeyboard(ctx.user.settings)
+            inline_keyboard: getSettingsKeyboard(ctx.state.user.settings)
         })
     })
     .action(/^set_(.+)_(.+)$/, async ctx => {
@@ -188,9 +188,9 @@ bot
                 val = parseInt(val);
                 break
         }
-        db.users.updateOne({_id: ctx.user._id}, {$set: {[`settings.${prop}`]: val}});
-        ctx.user.settings[prop] = val;
-        ctx.editMessageReplyMarkup({inline_keyboard: getSettingsKeyboard(ctx.user.settings)})
+        db.users.updateOne({_id: ctx.state.user._id}, {$set: {[`settings.${prop}`]: val}});
+        ctx.state.user.settings[prop] = val;
+        ctx.editMessageReplyMarkup({inline_keyboard: getSettingsKeyboard(ctx.state.user.settings)})
     })
     .start(async ctx => {
         let player;
