@@ -160,7 +160,7 @@ let timeouts = [];
 
 bot
     .use(async (ctx, next) => {
-        let user = await db.users.find({id: ctx.from.id});
+        let user = await db.users.findOne({id: ctx.from.id});
         if (!user) {
             let u = {
                 id: ctx.from.id,
@@ -176,7 +176,6 @@ bot
         next()
     })
     .settings(async ctx => {
-        console.log(ctx.state);
         ctx.reply('Здесь ты можешь изменить настройки', {
             inline_keyboard: getSettingsKeyboard(ctx.state.user.settings)
         })
