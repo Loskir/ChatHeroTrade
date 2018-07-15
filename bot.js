@@ -159,7 +159,7 @@ let getSettingsKeyboard = settings => [
 let timeouts = [];
 
 bot
-    .use(async ctx => {
+    .use(async (ctx, next) => {
         let user = await db.users.find({id: ctx.from.id});
         if (!user) {
             let u = {
@@ -172,7 +172,8 @@ bot
             u._id = r.insertedId;
             bot.context.user = u;
         }
-        else bot.context.user = user
+        else bot.context.user = user;
+        next()
     })
     .settings(async ctx => {
         
