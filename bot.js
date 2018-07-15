@@ -51,6 +51,7 @@ const str = {
     smthWentWrong: 'Что-то пошло не так...',
     tradeNotFound: 'Что-то пошло не так, сделка не найдена'
 };
+const tradeModes = ['inline', 'commands'];
 
 let getS = s => s === 'm' ? '👱' : s === 'f' ? '👩' : '🚷';
 let getName = p => getS(p.sex)+p.name;
@@ -136,6 +137,7 @@ let getPlayerTradeText = t => {
 };
 let getTradeText = t1 => `Ты предлагаешь:
 ${getPlayerTradeText(t1)}`;
+
 let getPlayerConfirmText = (p, t) => {
     let text = getPlayerTradeItemsText(t);
     return `${getName(p)} предлагает:
@@ -150,6 +152,10 @@ ${getPlayerConfirmText(p2, t2)}
 };
 let getConfirmKeyboard = (trade_id, i) => [[ib('✅Да', `confirm_${i}_${trade_id}`), ib('❌Нет', `cancel_${i}_${trade_id}`)]];
 
+let getSettingsKeyboard = settings => [
+        [ib(`Режим торговли: ${tradeModes[settings.tradeMode]}`, `set_tradeMode_${(settings.tradeMode+1) % tradeModes.length}`)]
+]
+
 let timeouts = [];
 
 bot
@@ -157,12 +163,33 @@ bot
         let user = await db.users.find({id: ctx.from.id});
         if (!user) {
             let u = {
-                id: ctx.from.id
+                id: ctx.from.id,
+                settings: {
+                    tradeMode: 0
+                }
             };
+            let r = await db.users.insertOne(u);
+            u._id = r.insertedId;
             bot.context.user = u;
-            db.users.insertOne(u)
         }
         else bot.context.user = user
+    })
+    .settings(async ctx => {
+        
+        ctx.reply('Здесь ты можешь изменить настройки', {
+            inline_keyboard: getSettingsKeyboard(ctx.user.settings)
+        })
+    })
+    .action(/^set_(.+)_(.+)$/, async ctx => {
+        let [, prop, val] = ctx.match;
+        switch(prop) {
+            case 'tradeMode':
+                val = parseInt(val);
+                break
+        }
+        db.users.updateOne({_id: ctx.user._id}, {$set: {[`settings.${prop}`]: val}});
+        ctx.user.settings[prop] = val;
+        ctx.editMessageReplyMarkup({inline_keyboard: getSettingsKeyboard(ctx.user.settings)})
     })
     .start(async ctx => {
         let player;
