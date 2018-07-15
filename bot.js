@@ -135,8 +135,8 @@ let getPlayerTradeText = t => {
     let tradeText = getPlayerTradeItemsText(t);
     return tradeText.text + (tradeText.empty ? '' : `\n\nОбщая стоимость: ${getItemName('money')}${getPlayerTradePrice(t)}`);
 };
-let getTradeText = t1 => `Ты предлагаешь:
-${getPlayerTradeText(t1)}`;
+let getTradeText = t => `Ты предлагаешь:
+${getPlayerTradeText(t)}`;
 
 let getPlayerConfirmText = (p, t) => {
     let text = getPlayerTradeItemsText(t);
@@ -153,7 +153,7 @@ ${getPlayerConfirmText(p2, t2)}
 let getConfirmKeyboard = (trade_id, i) => [[ib('✅Да', `confirm_${i}_${trade_id}`), ib('❌Нет', `cancel_${i}_${trade_id}`)]];
 
 let getSettingsKeyboard = settings => [
-        [ib(`Режим торговли: ${tradeModes[settings.tradeMode]}`, `set_tradeMode_${(settings.tradeMode+1) % tradeModes.length}`)]
+    [ib(`Режим торговли: ${tradeModes[settings.tradeMode]}`, `set_tradeMode_${(settings.tradeMode+1) % tradeModes.length}`)]
 ]
 
 let timeouts = [];
@@ -286,20 +286,34 @@ bot
         ctx.editMessageReplyMarkup();
         if (ctx.match[1] === 'decline') {
             ctx.answerCbQuery('Ты прогнал незваного торговца');
-            ctx.editMessageText('Ты прогнал незваного торговца');
+            ctx.deleteMessage();
             ctx.telegram.sendMessage(p2.id, `${getName(p1.player)} отказался торговаться с тобой`)
         }
         else {
             ctx.answerCbQuery(`Начинается торговля с ${getName(p2.player)}`);
             ctx.telegram.sendMessage(p2.id, `Начинается торговля с ${getName(p1.player)}`);
-            let t1 = {money: 0, items: {}, equip: {}};
-            let t2 = {money: 0, items: {}, equip: {}};
-            let trade = await db.trades.insertOne({p1: p1._id, p2: p2._id, t1, t2, selected: {}, tab: {'1': 1, '2': 1}});
-            ctx.reply(getTradeText(t1), {
+            let t = {money: 0, items: {}, equip: {}};
+            // let trade = await db.trades.insertOne({p1: p1._id, p2: p2._id, t1, t2, selected: {}, tab: {'1': 1, '2': 1}});
+            let trade = await db.trades.insertOne({
+                p: {
+                    '1': p1._id,
+                    '2': p2._id
+                },
+                t: {
+                    '1': t,
+                    '2': t
+                },
+                selected: {},
+                tab: {
+                    '1': 1,
+                    '2': 1
+                }
+            });
+            ctx.reply(getTradeText(t), {
                 parse_mode: 'HTML',
                 reply_markup: {inline_keyboard: getTradeKeyboard(trade.insertedId, 1, p1.player, undefined, 1)}
             });
-            ctx.telegram.sendMessage(p2.id, getTradeText(t2), {
+            ctx.telegram.sendMessage(p2.id, getTradeText(t), {
                 parse_mode: 'HTML',
                 reply_markup: {inline_keyboard: getTradeKeyboard(trade.insertedId, 2, p2.player, undefined, 1)}
             });
@@ -315,7 +329,7 @@ bot
         }
         
         let players = await getPlayers();
-        let player_id = trade[`p${index}`];
+        let player_id = trade.p[index];
         
         let p = players.find(v => v._id.toString() === player_id.toString());
         if (!p) {
@@ -323,7 +337,7 @@ bot
             ctx.editMessageReplyMarkup();
             return;
         }
-        ctx.editMessageText(getTradeText(trade[`t${index}`]), {
+        ctx.editMessageText(getTradeText(trade.t[index]), {
             parse_mode: 'HTML',
             reply_markup: {inline_keyboard: getTradeKeyboard(trade_id, index, p.player, item_id, trade.tab[index])}
         });
@@ -345,7 +359,7 @@ bot
             ctx.answerCbQuery(str.tradeNotFound);
             return
         }
-        let t = trade[`t${index}`];
+        let t = trade.t[index];
         
         let item_id = trade.selected[index];
         if (!item_id) {
@@ -354,7 +368,7 @@ bot
         }
         
         let players = await getPlayers();
-        let player_id = trade[`p${index}`];
+        let player_id = trade.p[index];
         
         let p = players.find(v => v._id.toString() === player_id.toString());
         if (!p) {
@@ -376,7 +390,7 @@ bot
         
         await db.trades.updateOne({_id: pm.mongo.ObjectId(trade_id)}, {$set: {[`t${index}.${item_id}`]: total}});
         trade = await db.trades.findOne({_id: pm.mongo.ObjectId(trade_id)});
-        t = trade[`t${index}`];
+        t = trade.t[index];
         ctx.editMessageText(getTradeText(t), {
             parse_mode: 'HTML',
             reply_markup: {inline_keyboard: getTradeKeyboard(trade_id, index, p.player, trade.selected[index], trade.tab[index])}
@@ -394,7 +408,7 @@ bot
         }
         
         let players = await getPlayers();
-        let player_id = trade[`p${index}`];
+        let player_id = trade.p[index];
         
         let p = players.find(v => v._id.toString() === player_id.toString());
         if (!p) {
@@ -402,7 +416,7 @@ bot
             ctx.editMessageReplyMarkup();
             return;
         }
-        ctx.editMessageText(getTradeText(trade[`t${index}`]), {
+        ctx.editMessageText(getTradeText(trade.t[index]), {
             parse_mode: 'HTML',
             reply_markup: {inline_keyboard: getTradeKeyboard(trade_id, index, p.player, trade.selected[index], tab)}
         });
@@ -426,12 +440,12 @@ bot
             return
         }
         let players = await getPlayers();
-        let p1 = players.find(v => v._id.toString() === trade.p1.toString());
+        let p1 = players.find(v => v._id.toString() === trade.p['1'].toString());
         if (!p1) {
             ctx.answerCbQuery(str.tokenExpired);
             return
         }
-        let p2 = players.find(v => v._id.toString() === trade.p2.toString());
+        let p2 = players.find(v => v._id.toString() === trade.p['2'].toString());
         if (!p2) {
             ctx.answerCbQuery(str.playerGone);
             return
@@ -439,13 +453,13 @@ bot
         let me = index === '1' ? p1 : p2;
         let he = index === '1' ? p2 : p1;
         if (!trade.ready) {
-            ctx.editMessageText(getTradeText(trade[`t${index}`])+'\n\nЖдем готовности твоего визави', {parse_mode: 'HTML'});
+            ctx.editMessageText(getTradeText(trade.t[index])+'\n\nЖдем готовности твоего визави', {parse_mode: 'HTML'});
             ctx.telegram.sendMessage(he.id, `${getName(me.player)} предлагает:
-${getPlayerTradeText(trade[`t${index}`])}`, {parse_mode: 'HTML'});
+${getPlayerTradeText(trade.t[index])}`, {parse_mode: 'HTML'});
             db.trades.updateOne({_id: pm.mongo.ObjectId(trade_id)}, {$set: {ready: true}});
         }
         else {
-            let text = getConfirmText(p1.player, trade.t1, p2.player, trade.t2);
+            let text = getConfirmText(p1.player, trade.t['1'], p2.player, trade.t['2']);
             ctx.reply(text, {
                 parse_mode: 'HTML',
                 reply_markup: {
@@ -490,13 +504,13 @@ ${getPlayerTradeText(trade[`t${index}`])}`, {parse_mode: 'HTML'});
             return
         }
         let players = await getPlayers();
-        let p1 = players.find(v => v._id.toString() === trade.p1.toString());
+        let p1 = players.find(v => v._id.toString() === trade.p['1'].toString());
         if (!p1) {
             ctx.answerCbQuery(str.tokenExpired);
             ctx.editMessageReplyMarkup();
             return
         }
-        let p2 = players.find(v => v._id.toString() === trade.p2.toString());
+        let p2 = players.find(v => v._id.toString() === trade.p['2'].toString());
         if (!p2) {
             ctx.answerCbQuery(str.playerGone);
             ctx.editMessageReplyMarkup();
@@ -518,45 +532,31 @@ ${getPlayerTradeText(trade[`t${index}`])}`, {parse_mode: 'HTML'});
             db.players.deleteOne(p2);
             
             //region фильтрация нулей
-            let t1 = {};
-            if (trade.t1.money > 0) t1.money = trade.t1.money;
-            if (Object.keys(trade.t1.items).length > 0) {
-                t1.items = {};
-                Object.keys(trade.t1.items).forEach(v => {
-                    if (trade.t1.items[v] <= 0) return;
-                    t1.items[v] = trade.t1.items[v]
-                });
-            }
-            if (Object.keys(trade.t1.equip).length > 0) {
-                t1.equip = {};
-                Object.keys(trade.t1.equip).forEach(v => {
-                    if (trade.t1.equip[v] <= 0) return;
-                    t1.equip[v] = trade.t1.equip[v]
-                });
-            }
-            let t2 = {};
-            if (trade.t2.money > 0) t2.money = trade.t2.money;
-            if (Object.keys(trade.t2.items).length > 0) {
-                t2.items = {};
-                Object.keys(trade.t2.items).forEach(v => {
-                    if (trade.t2.items[v] <= 0) return;
-                    t2.items[v] = trade.t2.items[v]
-                });
-            }
-            if (Object.keys(trade.t2.equip).length > 0) {
-                t2.equip = {};
-                Object.keys(trade.t2.equip).forEach(v => {
-                    if (trade.t2.equip[v] <= 0) return;
-                    t2.equip[v] = trade.t2.equip[v]
-                });
-            }
+            let t = {};
+            ['1', '2'].forEach(i => {
+                if (trade.t[i].money > 0) t[i].money = trade.t[i].money;
+                if (Object.keys(trade.t[i].items).length > 0) {
+                    t[i].items = {};
+                    Object.keys(trade.t[i].items).forEach(v => {
+                        if (trade.t[i].items[v] <= 0) return;
+                        t[i].items[v] = trade.t[i].items[v]
+                    });
+                }
+                if (Object.keys(trade.t[i].equip).length > 0) {
+                    t[i].equip = {};
+                    Object.keys(trade.t[i].equip).forEach(v => {
+                        if (trade.t[i].equip[v] <= 0) return;
+                        t[i].equip[v] = trade.t[i].equip[v]
+                    });
+                }
+            });
             //endregion
             
             let payload = {
                 accessToken1: p1.token,
                 accessToken2: p2.token,
-                player1: t1,
-                player2: t2
+                player1: t['1'],
+                player2: t['2']
             };
             rp({
                 method: 'POST',
@@ -585,13 +585,13 @@ ${getPlayerTradeText(trade[`t${index}`])}`, {parse_mode: 'HTML'});
             return
         }
         let players = await getPlayers();
-        let p1 = players.find(v => v._id.toString() === trade.p1.toString());
+        let p1 = players.find(v => v._id.toString() === trade.p['1'].toString());
         if (!p1) {
             ctx.answerCbQuery(str.tokenExpired);
             ctx.editMessageReplyMarkup();
             return
         }
-        let p2 = players.find(v => v._id.toString() === trade.p2.toString());
+        let p2 = players.find(v => v._id.toString() === trade.p['2'].toString());
         if (!p2) {
             ctx.answerCbQuery(str.playerGone);
             ctx.editMessageReplyMarkup();
