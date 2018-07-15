@@ -22,7 +22,7 @@ const bot = new Telegraf(tokens.bot);
 
 const pm = new PM();
 let db, cur;
-pm.initDb(['users', 'players', 'trades'], 'mongodb://127.0.0.1:27017/chathero_trade')
+pm.initDb(['users', 'players', 'trades'], 'mongodb://127.0.0.1:27017/ChatHeroTrade')
     .then(() => {
         console.log('Done');
         db = pm.cols;
