@@ -534,6 +534,7 @@ ${getPlayerTradeText(trade.t[index])}`, {parse_mode: 'HTML'});
             //region фильтрация нулей
             let t = {};
             ['1', '2'].forEach(i => {
+                t[i] = {};
                 if (trade.t[i].money > 0) t[i].money = trade.t[i].money;
                 if (Object.keys(trade.t[i].items).length > 0) {
                     t[i].items = {};
