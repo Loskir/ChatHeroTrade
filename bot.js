@@ -489,10 +489,10 @@ ${getPlayerTradeText(trade.t[index])}`, {parse_mode: 'HTML'});
         ctx.answerCbQuery('Щелк!');
         if (players.length === 0) {
             text += str.nobodyHere;
-            ctx.editMessageText(text, {reply_markup: {inline_keyboard: updateKeyboard}});
+            ctx.editMessageText(text, {reply_markup: {inline_keyboard: updateKeyboard}}).catch();
             return;
         }
-        ctx.editMessageText(text+'С кем будем торговаться?', {reply_markup: {inline_keyboard: getPlayersKeyboard(players)}});
+        ctx.editMessageText(text+'С кем будем торговаться?', {reply_markup: {inline_keyboard: getPlayersKeyboard(players)}}).catch();
     })
     .action(/^confirm_(\d)_(.+?)$/, async ctx => {
         let [, index, trade_id] = ctx.match;
