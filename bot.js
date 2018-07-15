@@ -52,7 +52,7 @@ const str = {
     tradeNotFound: 'Что-то пошло не так, сделка не найдена'
 };
 
-let getS = s => s === 'm' ? '🙎‍♂️' : s === 'f' ? '🙍' : '🚷';
+let getS = s => s === 'm' ? '👱' : s === 'f' ? '👩' : '🚷';
 let getName = p => getS(p.sex)+p.name;
 let ib = (text, callback_data) => ({text, callback_data});
 const updateKeyboard = [[ib('🔄 Обновить', 'update')]];
