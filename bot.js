@@ -176,7 +176,7 @@ bot
         next()
     })
     .settings(async ctx => {
-        
+        console.log(ctx.state);
         ctx.reply('Здесь ты можешь изменить настройки', {
             inline_keyboard: getSettingsKeyboard(ctx.state.user.settings)
         })
