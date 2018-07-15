@@ -22,7 +22,7 @@ const bot = new Telegraf(tokens.bot);
 
 const pm = new PM();
 let db, cur;
-pm.initDb(['players', 'trades'], 'mongodb://127.0.0.1:27017/chathero_trade')
+pm.initDb(['users', 'players', 'trades'], 'mongodb://127.0.0.1:27017/chathero_trade')
     .then(() => {
         console.log('Done');
         db = pm.cols;
@@ -63,6 +63,7 @@ let getPlayersKeyboard = players => [
 let getTradeKeyboard = (trade_id, i, p, selectedId, tab) => {
     let selected = id => id === selectedId ? selectedIcon : '';
     let kb = [
+        
         ...[p.money].filter(v => v > 0).map(() => [ib(selected('money')+getItemName('money'), `select_${i}_${trade_id}_money`)]),
         ...Object.keys(p.items).map(v => {
             let id = 'items.'+v;
@@ -152,6 +153,17 @@ let getConfirmKeyboard = (trade_id, i) => [[ib('✅Да', `confirm_${i}_${trade_
 let timeouts = [];
 
 bot
+    .use(async ctx => {
+        let user = await db.users.find({id: ctx.from.id});
+        if (!user) {
+            let u = {
+                id: ctx.from.id
+            };
+            bot.context.user = u;
+            db.users.insertOne(u)
+        }
+        else bot.context.user = user
+    })
     .start(async ctx => {
         let player;
         let players = await getPlayers();
