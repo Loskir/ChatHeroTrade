@@ -244,6 +244,26 @@ bot
         }
         ctx.reply(text+'С кем будем торговаться?', {reply_markup: {inline_keyboard: getPlayersKeyboard(players)}});
     })
+    .action('update', async ctx => {
+        let players = await getPlayers();
+        
+        let player = players.find(v => v.id === ctx.from.id);
+        if (!player) {
+            ctx.editMessageText(str.noToken);
+            return;
+        }
+        players = players.filter(v => v.id !== ctx.from.id);
+        
+        let text = `Ну что ж, привет, ${getName(player.player)}\n\n`;
+        
+        ctx.answerCbQuery('Щелк!');
+        if (players.length === 0) {
+            text += str.nobodyHere;
+            ctx.editMessageText(text, {reply_markup: {inline_keyboard: updateKeyboard}}).catch();
+            return;
+        }
+        ctx.editMessageText(text+'С кем будем торговаться?', {reply_markup: {inline_keyboard: getPlayersKeyboard(players)}}).catch();
+    })
     .action(/^id_(.+)$/, async ctx => {
         let players = await getPlayers();
         let p1 = players.find(v => v.id === ctx.from.id);
@@ -473,26 +493,6 @@ ${getPlayerTradeText(trade.t[index])}`, {parse_mode: 'HTML'});
                 }
             });
         }
-    })
-    .action('update', async ctx => {
-        let players = await getPlayers();
-        
-        let player = players.find(v => v.id === ctx.from.id);
-        if (!player) {
-            ctx.editMessageText(str.noToken);
-            return;
-        }
-        players = players.filter(v => v.id !== ctx.from.id);
-        
-        let text = `Ну что ж, привет, ${getName(player.player)}\n\n`;
-        
-        ctx.answerCbQuery('Щелк!');
-        if (players.length === 0) {
-            text += str.nobodyHere;
-            ctx.editMessageText(text, {reply_markup: {inline_keyboard: updateKeyboard}}).catch();
-            return;
-        }
-        ctx.editMessageText(text+'С кем будем торговаться?', {reply_markup: {inline_keyboard: getPlayersKeyboard(players)}}).catch();
     })
     .action(/^confirm_(\d)_(.+?)$/, async ctx => {
         let [, index, trade_id] = ctx.match;
