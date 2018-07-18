@@ -604,11 +604,11 @@ ${getPlayerTradeText(trade.t[index])}`, {parse_mode: 'HTML'});
         ctx.telegram.sendMessage(he.id, 'Твой визави отказался от проведения сделки. Шанс упущен...')
     })
     .help(ctx => {
-        ctx.reply(`Элизабет - обменник для @ChatHeroBot.
+        ctx.replyWithHTML(`Элизабет - обменник для @ChatHeroBot.
 Позволяет быстро и просто обменять монеты, предметы и экипировку.
 
 Написано @Loskir
-Сурсы <a href="https://github.com/Loskir/ChatHeroTrade">тут</a>`, {parse_mode: 'HTML'})
+Сурсы <a href="https://github.com/Loskir/ChatHeroTrade">тут</a>`)
     })
     .catch(console.log)
     .startPolling();
