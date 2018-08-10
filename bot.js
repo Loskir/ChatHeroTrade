@@ -9,6 +9,8 @@ const fs = require('mz/fs');
 
 const items_prices = require('./data/items/index.js');
 const items = require('./data/item.js');
+const potions_prices = require('./data/potions/index.js');
+const potions = require('./data/potion.js');
 const equip = require('./data/equip.js');
 const equip_prices = {};
 fs.readdir('./data/equip')
@@ -70,6 +72,10 @@ let getTradeKeyboard = (trade_id, i, p, selectedId, tab) => {
             let id = 'items.'+v;
             return [ib(selected(id)+getItemName(id), `select_${i}_${trade_id}_${id}`)]
         }),
+        ...Object.keys(p.potions).map(v => {
+            let id = 'potions.'+v;
+            return [ib(selected(id)+getItemName(id), `select_${i}_${trade_id}_${id}`)]
+        }),
         ...Object.keys(p.equip).map(v => {
             let id = 'equip.'+v;
             return [ib(selected(id)+getItemName(id), `select_${i}_${trade_id}_${id}`)]
@@ -100,6 +106,7 @@ let getItemName = i => {
     if (i === 'money') return '💰';
     let s = i.split('.');
     if (s[0] === 'items') return items[parseInt(s[1])];
+    if (s[0] === 'potions') return potions[parseInt(s[1])];
     if (s[0] === 'equip') {
         let t = s[1].split('_');
         return equip[t[0]][t[1]]
@@ -110,6 +117,7 @@ let getItemPrice = i => {
     if (i === 'money') return 1;
     let s = i.split('.');
     if (s[0] === 'items') return items_prices[s[1]].price;
+    if (s[0] === 'potions') return potions_prices[s[1]].price;
     if (s[0] === 'equip') {
         let t = s[1].split('_');
         return equip_prices[t[0]][t[1]].price;
@@ -119,6 +127,7 @@ let getPlayerTradeItemsText = t => {
     let arr = [
         ...[t.money || 0].filter(v => v > 0).map(v => `<b>${getItemName('money')}</b>${v}`),
         ...Object.keys(t.items).filter(v => t.items[v] > 0).map(v => `<b>${getItemName('items.'+v)}</b> ${t.items[v]}`),
+        ...Object.keys(t.potions).filter(v => t.potions[v] > 0).map(v => `<b>${getItemName('potions.'+v)}</b> ${t.potions[v]}`),
         ...Object.keys(t.equip).filter(v => t.equip[v] > 0).map(v => `<b>${getItemName('equip.'+v)}</b> ${t.equip[v]}`)
     ];
     return {
@@ -129,6 +138,7 @@ let getPlayerTradeItemsText = t => {
 let getPlayerTradePrice = t => {
     return getItemPrice('money')*t.money
         + Object.keys(t.items).map(v => getItemPrice('items.'+v)*t.items[v]).reduce((a, v) => a+v, 0)
+        + Object.keys(t.potions).map(v => getItemPrice('potions.'+v)*t.potions[v]).reduce((a, v) => a+v, 0)
         + Object.keys(t.equip).map(v => getItemPrice('equip.'+v)*t.equip[v]).reduce((a, v) => a+v, 0)
 };
 let getPlayerTradeText = t => {
@@ -312,7 +322,7 @@ bot
         else {
             ctx.answerCbQuery(`Начинается торговля с ${getName(p2.player)}`);
             ctx.telegram.sendMessage(p2.id, `Начинается торговля с ${getName(p1.player)}`);
-            let t = {money: 0, items: {}, equip: {}};
+            let t = {money: 0, items: {}, potions: {}, equip: {}};
             // let trade = await db.trades.insertOne({p1: p1._id, p2: p2._id, t1, t2, selected: {}, tab: {'1': 1, '2': 1}});
             let trade = await db.trades.insertOne({
                 p: {
@@ -541,6 +551,13 @@ ${getPlayerTradeText(trade.t[index])}`, {parse_mode: 'HTML'});
                     Object.keys(trade.t[i].items).forEach(v => {
                         if (trade.t[i].items[v] <= 0) return;
                         t[i].items[v] = trade.t[i].items[v]
+                    });
+                }
+                if (Object.keys(trade.t[i].potions).length > 0) {
+                    t[i].potions = {};
+                    Object.keys(trade.t[i].potions).forEach(v => {
+                        if (trade.t[i].potions[v] <= 0) return;
+                        t[i].potions[v] = trade.t[i].potions[v]
                     });
                 }
                 if (Object.keys(trade.t[i].equip).length > 0) {
