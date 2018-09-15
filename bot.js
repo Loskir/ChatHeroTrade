@@ -412,7 +412,7 @@ bot
         else curr = t[item_id.split('.')[0]][item_id.split('.')[1]] || 0;
         
         let max;
-        if (item_id === 'money') max = p.player.money;
+        if (item_id === 'money') max = p.player.money-2;
         else max = p.player[item_id.split('.')[0]][item_id.split('.')[1]];
         
         let total = Math.min(Math.max(0, curr+count), max);
