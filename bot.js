@@ -269,10 +269,10 @@ bot
         ctx.answerCbQuery('Щелк!');
         if (players.length === 0) {
             text += str.nobodyHere;
-            ctx.editMessageText(text, {reply_markup: {inline_keyboard: updateKeyboard}}).catch();
+            ctx.editMessageText(text, {reply_markup: {inline_keyboard: updateKeyboard}}).catch(console.log);
             return;
         }
-        ctx.editMessageText(text+'С кем будем торговаться?', {reply_markup: {inline_keyboard: getPlayersKeyboard(players)}}).catch();
+        ctx.editMessageText(text+'С кем будем торговаться?', {reply_markup: {inline_keyboard: getPlayersKeyboard(players)}}).catch(console.log);
     })
     .action(/^id_(.+)$/, async ctx => {
         let players = await getPlayers();
@@ -370,7 +370,7 @@ bot
         ctx.editMessageText(getTradeText(trade.t[index]), {
             parse_mode: 'HTML',
             reply_markup: {inline_keyboard: getTradeKeyboard(trade_id, index, p.player, item_id, trade.tab[index])}
-        });
+        }).catch(console.log);
         db.trades.updateOne({_id: pm.mongo.ObjectId(trade_id)}, {$set: {['selected.'+index]: item_id}})
             .then(r => {
                 if (r.result.n > 0) ctx.answerCbQuery('Выбран '+getItemName(item_id));
@@ -424,7 +424,7 @@ bot
         ctx.editMessageText(getTradeText(t), {
             parse_mode: 'HTML',
             reply_markup: {inline_keyboard: getTradeKeyboard(trade_id, index, p.player, trade.selected[index], trade.tab[index])}
-        });
+        }).catch(console.log);
         ctx.answerCbQuery(getItemName(item_id)+' '+(delta > 0 ? '+' : '')+delta)
     })
     .action(/^tab_(\d)_(.+)_(\d+)/, async ctx => {
@@ -449,7 +449,7 @@ bot
         ctx.editMessageText(getTradeText(trade.t[index]), {
             parse_mode: 'HTML',
             reply_markup: {inline_keyboard: getTradeKeyboard(trade_id, index, p.player, trade.selected[index], tab)}
-        });
+        }).catch(console.log);
         db.trades.updateOne({_id: pm.mongo.ObjectId(trade_id)}, {$set: {['tab.'+index]: tab}})
             .then(r => {
                 if (r.result.n > 0) ctx.answerCbQuery('Щелк!');
