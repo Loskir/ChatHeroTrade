@@ -116,11 +116,18 @@ let getItemName = i => {
 let getItemPrice = i => {
     if (i === 'money') return 1;
     let s = i.split('.');
-    if (s[0] === 'items') return items_prices[s[1]].price;
-    if (s[0] === 'potions') return potions_prices[s[1]].price;
-    if (s[0] === 'equip') {
-        let t = s[1].split('_');
-        return equip_prices[t[0]][t[1]].price;
+    try {
+        if (s[0] === 'items') return items_prices[s[1]].price;
+        if (s[0] === 'potions') return potions_prices[s[1]].price;
+        if (s[0] === 'equip') {
+            let t = s[1].split('_');
+            return equip_prices[t[0]][t[1]].price;
+        }
+    }
+    catch(e) {
+        // нет времени делать нормальную обработку отсутствия цены, пусть так
+        console.error(e);
+        return 0
     }
 };
 let getPlayerTradeItemsText = t => {
