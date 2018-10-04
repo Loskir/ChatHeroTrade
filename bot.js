@@ -84,14 +84,14 @@ let getTradeKeyboard = (trade_id, i, p, selectedId, tab) => {
     let maxtab = Math.ceil(kb.length/10);
     return [
         [
-            // ib('-1000', `edit_${i}_${trade_id}_-1000`),
+            ib('-1000', `edit_${i}_${trade_id}_-1000`),
             ib('-100', `edit_${i}_${trade_id}_-100`),
             ib('-10', `edit_${i}_${trade_id}_-10`),
             ib('-1', `edit_${i}_${trade_id}_-1`),
             ib('+1', `edit_${i}_${trade_id}_1`),
             ib('+10', `edit_${i}_${trade_id}_10`),
             ib('+100', `edit_${i}_${trade_id}_100`),
-            // ib('+1000', `edit_${i}_${trade_id}_1000`)
+            ib('+1000', `edit_${i}_${trade_id}_1000`)
         ],
         ...kb.slice((tab-1)*10, tab*10),
         ...[kb.length].filter(v => v > 10).map(v => [
@@ -419,7 +419,7 @@ bot
         else curr = t[item_id.split('.')[0]][item_id.split('.')[1]] || 0;
         
         let max;
-        if (item_id === 'money') max = p.player.money;
+        if (item_id === 'money') max = p.player.money-2;
         else max = p.player[item_id.split('.')[0]][item_id.split('.')[1]];
         
         let total = Math.min(Math.max(0, curr+count), max);
